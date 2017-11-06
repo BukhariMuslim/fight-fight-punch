@@ -1,0 +1,25 @@
+{
+  "scripts": {
+    "start": "node server.js"
+  },
+  "name": "fight-fight-punch",
+  "description": "",
+  "version": "1.0.0",
+  "main": "server.js",
+  "dependencies": {
+    "http": "0.0.0",
+    "http-server": "^0.10.0",
+    "socket.io": "^2.0.4"
+  },
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/BukhariMuslim/fight-fight-punch.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/BukhariMuslim/fight-fight-punch/issues"
+  },
+  "homepage": "https://github.com/BukhariMuslim/fight-fight-punch#readme"
+}

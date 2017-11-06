@@ -70,7 +70,7 @@ io.sockets.on('connection', function (socket) {
                     'stepTime': null
                 };
                 d.status = 'ready';
-                socket.set('playerslot', idx);
+                socket.playerslot = idx;
                 cnew = false;
             }
         }
@@ -110,172 +110,168 @@ io.sockets.on('connection', function (socket) {
             };
         
             var idx = playerIn.push(slot);
-            socket.set('playerslot', idx - 1);
+            socket.playerslot = idx - 1;
         }
         
         socket.emit('serverloginsuccess', null);
     });
 
     socket.on('clientattempt', function(id){
-        socket.get('playerslot', function(err, idx){
-            var slot = playerIn[idx];
-
-            socket.emit('serverplayerstatus', slot);
-        });
+        var idx = socket.playerslot;
+        var slot = playerIn[idx];
+        socket.emit('serverplayerstatus', slot);
     });
     
     socket.on('clientgame', function(id){
-        socket.get('playerslot', function(err, idx){
-            var slot = playerIn[idx];
-
-            socket.emit('servergame', slot);
-        });
+        var idx = socket.playerslot;
+        var slot = playerIn[idx];
+        socket.emit('servergame', slot);
     });
     
     socket.on('clientupdate', function(data){
-        socket.get('playerslot', function(err, idx){
-            var now = Date.now();
-            if (data.id) {
-                var then = playerIn[idx].players[data.id].lastUpdated == null ? Date.now() : playerIn[idx].players[data.id].lastUpdated;
-                var thenHit = playerIn[idx].players[data.id].lastHit == null ? Date.now() : playerIn[idx].players[data.id].lastHit;
-                var delta = (now - then) / 1000;
-                var deltaHit = (now - thenHit) / 1000;
-                
-                var pspeed = playerIn[idx].players[data.id].speed;
-                
-                if (data.keys.indexOf('left') > -1) {
-                    playerIn[idx].players[data.id].x -= pspeed * delta;
-                    playerIn[idx].players[data.id].lookRight = false;
-                    playerIn[idx].players[data.id].walking = true;
-                }
-                if (data.keys.indexOf('right') > -1) {
-                    playerIn[idx].players[data.id].x += pspeed * delta;
-                    playerIn[idx].players[data.id].lookRight = true;
-                    playerIn[idx].players[data.id].walking = true;
-                }
-                if (data.keys.indexOf('rHit') > -1) {
-                    playerIn[idx].players[data.id].rHit = true;
-                }
-                if (data.keys.indexOf('lHit') > -1) {
-                    playerIn[idx].players[data.id].rHit = false;
-                }
-                if (data.keys.indexOf('jump') > -1) {
-                    playerIn[idx].players[data.id].jumping = true;
-                }
-                if (data.keys.indexOf('land') > -1) {
-                    playerIn[idx].players[data.id].jumping = false;
-                }
-                if (data.keys.indexOf('attack') > -1) {
-                    playerIn[idx].players[data.id].hitting = true;
-                }
-                if (data.keys.indexOf('stopHit') > -1) {
-                    playerIn[idx].players[data.id].hitting = false;
-                }
-                if (data.keys.indexOf('stopWalk') > -1) {
-                    playerIn[idx].players[data.id].walking = false;
-                }
+        var idx = socket.playerslot;
+        var slot = playerIn[idx];
+        var now = Date.now();
+        if (data.id) {
+            var then = playerIn[idx].players[data.id].lastUpdated == null ? Date.now() : playerIn[idx].players[data.id].lastUpdated;
+            var thenHit = playerIn[idx].players[data.id].lastHit == null ? Date.now() : playerIn[idx].players[data.id].lastHit;
+            var delta = (now - then) / 1000;
+            var deltaHit = (now - thenHit) / 1000;
+            
+            var pspeed = playerIn[idx].players[data.id].speed;
+            
+            if (data.keys.indexOf('left') > -1) {
+                playerIn[idx].players[data.id].x -= pspeed * delta;
+                playerIn[idx].players[data.id].lookRight = false;
+                playerIn[idx].players[data.id].walking = true;
+            }
+            if (data.keys.indexOf('right') > -1) {
+                playerIn[idx].players[data.id].x += pspeed * delta;
+                playerIn[idx].players[data.id].lookRight = true;
+                playerIn[idx].players[data.id].walking = true;
+            }
+            if (data.keys.indexOf('rHit') > -1) {
+                playerIn[idx].players[data.id].rHit = true;
+            }
+            if (data.keys.indexOf('lHit') > -1) {
+                playerIn[idx].players[data.id].rHit = false;
+            }
+            if (data.keys.indexOf('jump') > -1) {
+                playerIn[idx].players[data.id].jumping = true;
+            }
+            if (data.keys.indexOf('land') > -1) {
+                playerIn[idx].players[data.id].jumping = false;
+            }
+            if (data.keys.indexOf('attack') > -1) {
+                playerIn[idx].players[data.id].hitting = true;
+            }
+            if (data.keys.indexOf('stopHit') > -1) {
+                playerIn[idx].players[data.id].hitting = false;
+            }
+            if (data.keys.indexOf('stopWalk') > -1) {
+                playerIn[idx].players[data.id].walking = false;
+            }
 
-                if(playerIn[idx].players[data.id].x < 50)
-                    playerIn[idx].players[data.id].x += pspeed * delta;
-                if(playerIn[idx].players[data.id].x + playerIn[idx].players[data.id].w > 800)
-                    playerIn[idx].players[data.id].x -= pspeed * delta;
-                
-                for(var i in playerIn[idx].punches){
-                    var playerBound = {};
-                    if (!playerIn[idx].players[data.id].lookRight) {
-                        playerBound = {
-                            'x': playerIn[idx].players[data.id].x + playerIn[idx].players[data.id].boundary.x - 20,
-                            'y': playerIn[idx].players[data.id].y + playerIn[idx].players[data.id].boundary.y - 100,
-                            'width': playerIn[idx].players[data.id].boundary.w,
-                            'height': playerIn[idx].players[data.id].boundary.h
-                        };
-                    }
-                    else {
-                        playerBound = {
-                            'x': playerIn[idx].players[data.id].x + playerIn[idx].players[data.id].boundary.x + 20,
-                            'y': playerIn[idx].players[data.id].y + playerIn[idx].players[data.id].boundary.y - 100,
-                            'width': playerIn[idx].players[data.id].boundary.w,
-                            'height': playerIn[idx].players[data.id].boundary.h
-                        };
-                    }
-                    if(arrayHasOwnIndex(playerIn[idx].punches, i)){
-                        if(playerIn[idx].punches[i].owner == data.id){
-                            playerIn[idx].punches[i].x += playerIn[idx].punches[i].speedx * delta;
-                            
-                            if(
-                                playerIn[idx].punches[i].x < 0 ||
-                                playerIn[idx].punches[i].x > 800 ||
-                                playerIn[idx].punches[i].y < playerIn[idx].players[data.id].y - 100 ||
-                                playerIn[idx].punches[i].y > playerIn[idx].players[data.id].y + playerIn[idx].players[data.id].h + 40
-                            ){
-                                playerIn[idx].punches.splice(i, 1);
-                            }
-                        }
-                        else if(
-                            collisionDetect(playerBound,
-                            {
-                                'x': playerIn[idx].punches[i].x - playerIn[idx].punches[i].radius/2,
-                                'y': playerIn[idx].punches[i].y - playerIn[idx].punches[i].radius/2,
-                                'width': playerIn[idx].punches[i].radius,
-                                'height': playerIn[idx].punches[i].radius
-                            })
-                            && !playerIn[idx].players[data.id].jumping
+            if(playerIn[idx].players[data.id].x < 50)
+                playerIn[idx].players[data.id].x += pspeed * delta;
+            if(playerIn[idx].players[data.id].x + playerIn[idx].players[data.id].w > 800)
+                playerIn[idx].players[data.id].x -= pspeed * delta;
+            
+            for(var i in playerIn[idx].punches){
+                var playerBound = {};
+                if (!playerIn[idx].players[data.id].lookRight) {
+                    playerBound = {
+                        'x': playerIn[idx].players[data.id].x + playerIn[idx].players[data.id].boundary.x - 20,
+                        'y': playerIn[idx].players[data.id].y + playerIn[idx].players[data.id].boundary.y - 100,
+                        'width': playerIn[idx].players[data.id].boundary.w,
+                        'height': playerIn[idx].players[data.id].boundary.h
+                    };
+                }
+                else {
+                    playerBound = {
+                        'x': playerIn[idx].players[data.id].x + playerIn[idx].players[data.id].boundary.x + 20,
+                        'y': playerIn[idx].players[data.id].y + playerIn[idx].players[data.id].boundary.y - 100,
+                        'width': playerIn[idx].players[data.id].boundary.w,
+                        'height': playerIn[idx].players[data.id].boundary.h
+                    };
+                }
+                if(arrayHasOwnIndex(playerIn[idx].punches, i)){
+                    if(playerIn[idx].punches[i].owner == data.id){
+                        playerIn[idx].punches[i].x += playerIn[idx].punches[i].speedx * delta;
+                        
+                        if(
+                            playerIn[idx].punches[i].x < 0 ||
+                            playerIn[idx].punches[i].x > 800 ||
+                            playerIn[idx].punches[i].y < playerIn[idx].players[data.id].y - 100 ||
+                            playerIn[idx].punches[i].y > playerIn[idx].players[data.id].y + playerIn[idx].players[data.id].h + 40
                         ){
-                            playerIn[idx].players[data.id].health -= playerIn[idx].punches[i].damage;
                             playerIn[idx].punches.splice(i, 1);
                         }
                     }
-                }
-                
-                if (data.keys.indexOf('attack') > -1 &&
-                    (playerIn[idx].players[data.id].lastHit == null || deltaHit >= 1)
-                ) {
-                    var px = playerIn[idx].players[data.id].x;
-                    var py = playerIn[idx].players[data.id].y - 30;
-                    var pw = playerIn[idx].players[data.id].w;
-                    
-                    var lx = px + pw + 40;
-                    var sp = 1;
-                    var right = true;
-                    
-                    if (!playerIn[idx].players[data.id].lookRight) { 
-                        lx = px - 10;
-                        sp = -1;
-                        right = false;
-                    }
-                    
-                    playerIn[idx].punches.push({
-                        'owner': data.id,
-                        'x': lx,
-                        'y': py,
-                        'lookRight': right,
-                        'radius': 30,
-                        'speedx': 100 * sp,
-                        'speedy': 100,
-                        'damage': 10
-                    });
-                    
-                    playerIn[idx].players[data.id].lastHit = now;
-                }
-                
-                playerIn[idx].players[data.id].lastUpdated = now;
-                
-                var end = false;
-                for(var i in playerIn[idx].players){
-                    if(end == false && playerIn[idx].players.hasOwnProperty(i)){
-                        if(i == data.id && playerIn[idx].players[i].health <= 0){
-                            socket.emit('serverend', 'lose');
-                            end = true;
-                        }
-                        else if(i != data.id && playerIn[idx].players[i].health <= 0){
-                            socket.emit('serverend', 'win');
-                            end = true;
-                        }
+                    else if(
+                        collisionDetect(playerBound,
+                        {
+                            'x': playerIn[idx].punches[i].x - playerIn[idx].punches[i].radius/2,
+                            'y': playerIn[idx].punches[i].y - playerIn[idx].punches[i].radius/2,
+                            'width': playerIn[idx].punches[i].radius,
+                            'height': playerIn[idx].punches[i].radius
+                        })
+                        && !playerIn[idx].players[data.id].jumping
+                    ){
+                        playerIn[idx].players[data.id].health -= playerIn[idx].punches[i].damage;
+                        playerIn[idx].punches.splice(i, 1);
                     }
                 }
-                
-                if(end == false) socket.emit('servergame', playerIn[idx]);
             }
-        });
+            
+            if (data.keys.indexOf('attack') > -1 &&
+                (playerIn[idx].players[data.id].lastHit == null || deltaHit >= 1)
+            ) {
+                var px = playerIn[idx].players[data.id].x;
+                var py = playerIn[idx].players[data.id].y - 30;
+                var pw = playerIn[idx].players[data.id].w;
+                
+                var lx = px + pw + 40;
+                var sp = 1;
+                var right = true;
+                
+                if (!playerIn[idx].players[data.id].lookRight) { 
+                    lx = px - 10;
+                    sp = -1;
+                    right = false;
+                }
+                
+                playerIn[idx].punches.push({
+                    'owner': data.id,
+                    'x': lx,
+                    'y': py,
+                    'lookRight': right,
+                    'radius': 30,
+                    'speedx': 100 * sp,
+                    'speedy': 100,
+                    'damage': 10
+                });
+                
+                playerIn[idx].players[data.id].lastHit = now;
+            }
+            
+            playerIn[idx].players[data.id].lastUpdated = now;
+            
+            var end = false;
+            for(var i in playerIn[idx].players){
+                if(end == false && playerIn[idx].players.hasOwnProperty(i)){
+                    if(i == data.id && playerIn[idx].players[i].health <= 0){
+                        socket.emit('serverend', 'lose');
+                        end = true;
+                    }
+                    else if(i != data.id && playerIn[idx].players[i].health <= 0){
+                        socket.emit('serverend', 'win');
+                        end = true;
+                    }
+                }
+            }
+            
+            if(end == false) socket.emit('servergame', playerIn[idx]);
+        }
     });
 });
