@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "start": "node server.js && http-server"
+    "start": "node server.js && node bin/http-server -p 3000"
   },
   "name": "fight-fight-punch",
   "description": "",
