@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "start": "node server.js",
+    "start": "node server.js && node serverL.js",
     "stop": "npm stop"
   },
   "name": "fight-fight-punch",

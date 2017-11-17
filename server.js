@@ -7,10 +7,6 @@ function server(request, response) {
   response.end();
 }
 
-var htmlserver = serve('./', {
-  port: process.env.PORT || 3000
-});
-
 function lenObject(obj) {
   var size = 0;
   for (var key in obj) { if (obj.hasOwnProperty(key)) size++; }
