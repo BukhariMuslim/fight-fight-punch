@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "start": "node server.js && node serverL.js",
+    "start": "node server.js",
     "stop": "npm stop"
   },
   "name": "fight-fight-punch",
@@ -8,12 +8,9 @@
   "version": "1.0.0",
   "main": "server.js",
   "dependencies": {
-    "http": "0.0.0",
-    "http-server": "^0.10.0",
-    "serve": "^6.4.1",
+    "express": "^5.1.0",
     "socket.io": "^2.0.4"
   },
-  "devDependencies": {},
   "repository": {
     "type": "git",
     "url": "git+https://github.com/BukhariMuslim/fight-fight-punch.git"

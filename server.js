@@ -1,11 +1,20 @@
-var http = require('http').createServer(server).listen(7228);
-var io = require('socket.io').listen(http);
-var serve = require('serve');
+const express = require('express');
+const path = require('path');
+const http = require('http');
 
-function server(request, response) {
-  response.writeHead(200, { 'content-type': 'plain-text' });
-  response.end();
-}
+const app = express();
+
+// Serve static files from repository root (index.html, js/, css/, etc.)
+app.use(express.static(path.join(__dirname)));
+
+const server = http.createServer(app);
+const io = require('socket.io')(server);
+
+const PORT = process.env.PORT || 7228;
+
+server.listen(PORT, () => {
+  console.log('Server listening on port', PORT);
+});
 
 function lenObject(obj) {
   var size = 0;
